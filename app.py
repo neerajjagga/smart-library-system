@@ -9,7 +9,7 @@ but with clearer code and more comments!
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from database import SimpleDatabase
-from algorithms import merge_sort_books, simple_search
+from algorithms import merge_sort_books, simple_search, astar_book_recommendations
 
 # Create Flask app
 app = Flask(__name__)
@@ -208,38 +208,44 @@ def all_books():
 @app.route('/recommendations')
 def recommendations():
     """
-    Show personalized recommendations
+    Show personalized recommendations using A* SEARCH ALGORITHM
     
-    Simple recommendation logic:
-    - Find books user has borrowed
-    - Recommend books from same genres
+    AI TECHNIQUE (Unit-II from syllabus):
+    - Uses A* algorithm for intelligent recommendations
+    - Considers multiple factors: genre, author, year, availability
+    - Provides optimal recommendations with scoring
+    
+    This is MUCH better than simple genre matching!
     """
     user_id = session.get('user_id', 1)
     
     # Get user's borrowed books
     borrowed = db.get_user_borrowed_books(user_id)
+    
+    # Get all available books
+    all_books = db.get_all_books()
+    
+    # ========================================
+    # USE A* ALGORITHM HERE! (AI TECHNIQUE)
+    # ========================================
+    # This considers: genre, author, year, availability, popularity
+    astar_recommendations = astar_book_recommendations(
+        user_borrowed_books=borrowed,
+        all_books=all_books,
+        top_n=10
+    )
+    
+    # Also get simple recommendations for comparison (optional)
     borrowed_genres = set(b['genre'] for b in borrowed)
     borrowed_ids = set(b['book_id'] for b in borrowed)
-    
-    # Find books from same genres
-    all_books = db.get_all_books()
-    recommendations_list = []
-    
-    for book in all_books:
-        # Skip if already borrowed
-        if book['book_id'] in borrowed_ids:
-            continue
-        
-        # If book is in a genre user likes, recommend it
-        if book['genre'] in borrowed_genres:
-            recommendations_list.append(book)
-    
-    # Sort recommendations
-    recommendations_list = merge_sort_books(recommendations_list, field='title')
+    simple_recommendations = [
+        book for book in all_books 
+        if book['book_id'] not in borrowed_ids and book['genre'] in borrowed_genres
+    ][:10]
     
     return render_template('recommendations.html', 
-                         collaborative_recommendations=recommendations_list[:10],
-                         popular_books=[])
+                         collaborative_recommendations=astar_recommendations,
+                         popular_books=simple_recommendations)
 
 
 # ============================================
