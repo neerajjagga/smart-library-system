@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Library System{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .search-focus:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .recommendation-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Navigation Bar -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-book-open mr-2"></i>
+                        Smart Library
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/" class="hover:text-gray-200 transition">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="/books" class="hover:text-gray-200 transition">
+                        <i class="fas fa-book mr-1"></i> All Books
+                    </a>
+                    <a href="/recommendations" class="hover:text-gray-200 transition">
+                        <i class="fas fa-star mr-1"></i> Recommendations
+                    </a>
+                    <a href="/my-books" class="hover:text-gray-200 transition">
+                        <i class="fas fa-bookmark mr-1"></i> My Books
+                    </a>
+                    <a href="/admin/add-book" class="hover:text-gray-200 transition">
+                        <i class="fas fa-plus-circle mr-1"></i> Add Book
+                    </a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+                <a href="/" class="block py-2 hover:bg-purple-700 rounded px-2">
+                    <i class="fas fa-home mr-1"></i> Home
+                </a>
+                <a href="/books" class="block py-2 hover:bg-purple-700 rounded px-2">
+                    <i class="fas fa-book mr-1"></i> All Books
+                </a>
+                <a href="/recommendations" class="block py-2 hover:bg-purple-700 rounded px-2">
+                    <i class="fas fa-star mr-1"></i> Recommendations
+                </a>
+                <a href="/my-books" class="block py-2 hover:bg-purple-700 rounded px-2">
+                    <i class="fas fa-bookmark mr-1"></i> My Books
+                </a>
+                <a href="/admin/add-book" class="block py-2 hover:bg-purple-700 rounded px-2">
+                    <i class="fas fa-plus-circle mr-1"></i> Add Book
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Smart Library System</h3>
+                    <p class="text-gray-400">
+                        Efficient book search and AI-powered recommendations using advanced algorithms.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Features</h3>
+                    <ul class="text-gray-400 space-y-2">
+                        <li><i class="fas fa-check mr-2"></i> Binary Search Algorithm</li>
+                        <li><i class="fas fa-check mr-2"></i> Merge Sort Indexing</li>
+                        <li><i class="fas fa-check mr-2"></i> Cosine Similarity</li>
+                        <li><i class="fas fa-check mr-2"></i> Content-Based Filtering</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Algorithms</h3>
+                    <ul class="text-gray-400 space-y-2">
+                        <li><i class="fas fa-code mr-2"></i> O(log n) Search</li>
+                        <li><i class="fas fa-code mr-2"></i> O(n log n) Sorting</li>
+                        <li><i class="fas fa-code mr-2"></i> Vector Similarity</li>
+                        <li><i class="fas fa-code mr-2"></i> Collaborative Filtering</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Smart Library System. Built with Flask, Python & AI.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

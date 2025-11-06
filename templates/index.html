@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Smart Library System{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section with Search -->
+<div class="gradient-bg rounded-xl shadow-xl p-12 mb-12 text-white">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-5xl font-bold mb-4">
+            <i class="fas fa-book-reader mr-3"></i>
+            Smart Library System
+        </h1>
+        <p class="text-xl mb-8 text-gray-100">
+            Discover books with AI-powered recommendations and efficient search algorithms
+        </p>
+        
+        <!-- Search Bar -->
+        <form action="/search" method="get" class="relative">
+            <div class="flex items-center bg-white rounded-lg shadow-lg overflow-hidden">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search by title, author, genre, or keywords..." 
+                    class="flex-1 px-6 py-4 text-gray-800 focus:outline-none text-lg"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 font-semibold transition"
+                >
+                    <i class="fas fa-search mr-2"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-6 flex items-center justify-center space-x-4 text-sm">
+            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                <i class="fas fa-bolt mr-1"></i> Binary Search O(log n)
+            </span>
+            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                <i class="fas fa-sort mr-1"></i> Merge Sort O(n log n)
+            </span>
+            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                <i class="fas fa-brain mr-1"></i> AI Recommendations
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+    <div class="bg-white rounded-lg shadow-md p-6 text-center card-hover">
+        <div class="text-4xl text-blue-600 mb-2">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="text-3xl font-bold text-gray-800">{{ stats.total_books }}</div>
+        <div class="text-gray-600">Total Books</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 text-center card-hover">
+        <div class="text-4xl text-green-600 mb-2">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="text-3xl font-bold text-gray-800">{{ stats.total_users }}</div>
+        <div class="text-gray-600">Active Users</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 text-center card-hover">
+        <div class="text-4xl text-purple-600 mb-2">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="text-3xl font-bold text-gray-800">{{ stats.available_books }}</div>
+        <div class="text-gray-600">Available Books</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 text-center card-hover">
+        <div class="text-4xl text-orange-600 mb-2">
+            <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="text-3xl font-bold text-gray-800">{{ stats.total_borrowings }}</div>
+        <div class="text-gray-600">Total Borrowings</div>
+    </div>
+</div>
+
+<!-- Popular Books -->
+{% if popular_books %}
+<div class="mb-12">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-fire text-orange-500 mr-2"></i>
+            Popular Books
+        </h2>
+        <a href="/books" class="text-purple-600 hover:text-purple-700 font-semibold">
+            View All <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for book in popular_books %}
+        <a href="/book/{{ book.book_id }}" class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ book.title }}</h3>
+                        <p class="text-gray-600 mb-1">
+                            <i class="fas fa-user mr-1"></i> {{ book.author }}
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-tag mr-1"></i> {{ book.genre }}
+                        </p>
+                    </div>
+                    {% if book.borrow_count %}
+                    <span class="recommendation-badge text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-fire"></i> {{ book.borrow_count }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                {% if book.description %}
+                <p class="text-gray-700 text-sm mb-4 line-clamp-3">
+                    {{ book.description[:150] }}{% if book.description|length > 150 %}...{% endif %}
+                </p>
+                {% endif %}
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-calendar mr-1"></i> {{ book.publication_year or 'N/A' }}
+                    </span>
+                    <span class="text-sm {% if book.available_copies > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        <i class="fas fa-copy mr-1"></i> {{ book.available_copies }} available
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Books -->
+{% if recent_books %}
+<div class="mb-12">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-clock text-blue-500 mr-2"></i>
+            Recently Added
+        </h2>
+        <a href="/books" class="text-purple-600 hover:text-purple-700 font-semibold">
+            View All <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for book in recent_books %}
+        <a href="/book/{{ book.book_id }}" class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ book.title }}</h3>
+                <p class="text-gray-600 mb-1">
+                    <i class="fas fa-user mr-1"></i> {{ book.author }}
+                </p>
+                <p class="text-gray-600 mb-4">
+                    <i class="fas fa-tag mr-1"></i> {{ book.genre }}
+                </p>
+                
+                {% if book.keywords %}
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% for keyword in book.keywords.split(',')[:3] %}
+                    <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">
+                        {{ keyword.strip() }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-calendar mr-1"></i> {{ book.publication_year or 'N/A' }}
+                    </span>
+                    <span class="text-sm {% if book.available_copies > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        <i class="fas fa-copy mr-1"></i> {{ book.available_copies }} available
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Features -->
+<div class="bg-white rounded-xl shadow-lg p-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+        <i class="fas fa-cogs mr-2"></i>
+        System Features
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center p-6">
+            <div class="text-4xl text-blue-600 mb-4">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Binary Search</h3>
+            <p class="text-gray-600">O(log n) efficient search algorithm for fast results</p>
+        </div>
+        
+        <div class="text-center p-6">
+            <div class="text-4xl text-green-600 mb-4">
+                <i class="fas fa-sort-amount-down"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Merge Sort</h3>
+            <p class="text-gray-600">O(n log n) sorting for organized book indexing</p>
+        </div>
+        
+        <div class="text-center p-6">
+            <div class="text-4xl text-purple-600 mb-4">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">AI Recommendations</h3>
+            <p class="text-gray-600">Cosine similarity for content-based filtering</p>
+        </div>
+        
+        <div class="text-center p-6">
+            <div class="text-4xl text-orange-600 mb-4">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Collaborative Filtering</h3>
+            <p class="text-gray-600">Pattern-based recommendations from user behavior</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

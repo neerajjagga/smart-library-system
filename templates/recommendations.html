@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations - Library System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 30px;
+    }
+    
+    .page-header p {
+        color: #666;
+        margin-top: 10px;
+    }
+    
+    .section {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .section-header {
+        margin-bottom: 20px;
+    }
+    
+    .section-header h2 {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+    
+    .section-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    
+    .book-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+    
+    .book-card:hover {
+        border-color: #2c5aa0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .book-card h3 {
+        color: #2c5aa0;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    
+    .book-card p {
+        font-size: 14px;
+        color: #666;
+        margin: 5px 0;
+    }
+    
+    .book-card .description {
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+    
+    .book-card .availability {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    
+    .available { color: #28a745; }
+    .unavailable { color: #dc3545; }
+    
+    .empty-state {
+        background: #f8f9fa;
+        padding: 60px 20px;
+        text-align: center;
+        border-radius: 8px;
+    }
+    
+    .empty-state h2 {
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+    
+    @media (max-width: 768px) {
+        .book-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Personalized Recommendations</h1>
+    <p>Book suggestions based on your borrowing history and preferences</p>
+</div>
+
+<!-- User Pattern Recommendations -->
+{% if collaborative_recommendations %}
+<div class="section">
+    <div class="section-header">
+        <h2>Based on Your Reading Patterns</h2>
+        <p>Recommended from users with similar interests</p>
+    </div>
+    
+    <div class="book-grid">
+        {% for book in collaborative_recommendations %}
+        <a href="/book/{{ book.book_id }}" class="book-card">
+            <h3>{{ book.title }}</h3>
+            <p>Author: {{ book.author }}</p>
+            <p>Genre: {{ book.genre }}</p>
+            {% if book.description %}
+            <p class="description">{{ book.description[:100] }}{% if book.description|length > 100 %}...{% endif %}</p>
+            {% endif %}
+            <p class="availability {% if book.available_copies > 0 %}available{% else %}unavailable{% endif %}">
+                {{ book.available_copies }} available
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Popular Books -->
+{% if popular_books %}
+<div class="section">
+    <div class="section-header">
+        <h2>Trending Books</h2>
+        <p>Most borrowed books in the library</p>
+    </div>
+    
+    <div class="book-grid">
+        {% for book in popular_books %}
+        <a href="/book/{{ book.book_id }}" class="book-card">
+            <h3>{{ book.title }}</h3>
+            <p>Author: {{ book.author }}</p>
+            <p>Genre: {{ book.genre }}</p>
+            {% if book.description %}
+            <p class="description">{{ book.description[:100] }}{% if book.description|length > 100 %}...{% endif %}</p>
+            {% endif %}
+            <p class="availability {% if book.available_copies > 0 %}available{% else %}unavailable{% endif %}">
+                {{ book.available_copies }} available
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if not collaborative_recommendations and not popular_books %}
+<div class="empty-state">
+    <h2>Start Borrowing Books</h2>
+    <p>Borrow some books to get personalized recommendations!</p>
+    <a href="/books" class="btn btn-primary">Browse Books</a>
+</div>
+{% endif %}
+
+{% endblock %}

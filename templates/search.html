@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Smart Library System{% endblock %}
+
+{% block content %}
+
+<!-- Search Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-search mr-2"></i>
+        Search Results
+    </h1>
+    
+    <!-- Search Form -->
+    <form action="/search" method="get" class="mb-6">
+        <div class="flex items-center">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}"
+                placeholder="Search by title, author, genre, or keywords..." 
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none search-focus"
+                required
+            >
+            <button 
+                type="submit" 
+                class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-r-lg font-semibold transition"
+            >
+                <i class="fas fa-search mr-2"></i> Search
+            </button>
+        </div>
+    </form>
+    
+    <!-- Filters and Sorting -->
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center space-x-2">
+            <label class="text-gray-700 font-semibold">Sort by:</label>
+            <select 
+                onchange="window.location.href='/search?q={{ query }}&genre={{ filter_genre }}&sort=' + this.value"
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none search-focus"
+            >
+                <option value="relevance" {% if sort_by == 'relevance' %}selected{% endif %}>Relevance</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+                <option value="author" {% if sort_by == 'author' %}selected{% endif %}>Author</option>
+                <option value="year" {% if sort_by == 'year' %}selected{% endif %}>Year</option>
+            </select>
+        </div>
+        
+        {% if genres %}
+        <div class="flex items-center space-x-2">
+            <label class="text-gray-700 font-semibold">Genre:</label>
+            <select 
+                onchange="window.location.href='/search?q={{ query }}&sort={{ sort_by }}&genre=' + this.value"
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none search-focus"
+            >
+                <option value="">All Genres</option>
+                {% for genre in genres %}
+                <option value="{{ genre }}" {% if filter_genre == genre %}selected{% endif %}>{{ genre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Results -->
+{% if query %}
+<div class="mb-6">
+    <p class="text-gray-600">
+        Found <span class="font-bold text-purple-600">{{ books|length }}</span> results for 
+        "<span class="font-semibold">{{ query }}</span>"
+        {% if filter_genre %}in <span class="font-semibold">{{ filter_genre }}</span>{% endif %}
+    </p>
+</div>
+{% endif %}
+
+{% if books %}
+<div class="grid grid-cols-1 gap-6">
+    {% for book in books %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+        <div class="p-6">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <a href="/book/{{ book.book_id }}" class="text-2xl font-bold text-gray-800 hover:text-purple-600 mb-2 block">
+                        {{ book.title }}
+                    </a>
+                    
+                    <div class="flex flex-wrap items-center gap-4 mb-3">
+                        <span class="text-gray-700">
+                            <i class="fas fa-user text-purple-600 mr-1"></i>
+                            <strong>Author:</strong> {{ book.author }}
+                        </span>
+                        <span class="text-gray-700">
+                            <i class="fas fa-tag text-green-600 mr-1"></i>
+                            <strong>Genre:</strong> {{ book.genre }}
+                        </span>
+                        {% if book.publication_year %}
+                        <span class="text-gray-700">
+                            <i class="fas fa-calendar text-blue-600 mr-1"></i>
+                            <strong>Year:</strong> {{ book.publication_year }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if book.description %}
+                    <p class="text-gray-700 mb-3">
+                        {{ book.description[:200] }}{% if book.description|length > 200 %}...{% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    {% if book.keywords %}
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="text-sm text-gray-600 font-semibold">Keywords:</span>
+                        {% for keyword in book.keywords.split(',')[:5] %}
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            {{ keyword.strip() }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex items-center space-x-4">
+                        {% if book.isbn %}
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-barcode mr-1"></i> ISBN: {{ book.isbn }}
+                        </span>
+                        {% endif %}
+                        <span class="text-sm {% if book.available_copies > 0 %}text-green-600{% else %}text-red-600{% endif %} font-semibold">
+                            <i class="fas fa-copy mr-1"></i> {{ book.available_copies }}/{{ book.total_copies }} available
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="ml-6 flex flex-col items-end space-y-2">
+                    {% if book.relevance_score %}
+                    <div class="recommendation-badge text-white px-4 py-2 rounded-lg text-center">
+                        <div class="text-2xl font-bold">{{ (book.relevance_score * 10)|int }}%</div>
+                        <div class="text-xs">Match</div>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="/book/{{ book.book_id }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+    <i class="fas fa-search text-yellow-600 text-5xl mb-4"></i>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">No Results Found</h2>
+    <p class="text-gray-600 mb-6">
+        We couldn't find any books matching "{{ query }}". Try different keywords or browse all books.
+    </p>
+    <div class="flex justify-center space-x-4">
+        <a href="/books" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+            <i class="fas fa-book mr-2"></i> Browse All Books
+        </a>
+        <a href="/" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+            <i class="fas fa-home mr-2"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
